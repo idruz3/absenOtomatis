@@ -17,6 +17,7 @@ wait = WebDriverWait(driver, 10)
 # Open the website
 driver.get("https://lms.thamrin.ac.id/")
 
+
 try:
     # Wait for the sign-in button to be clickable and click it
     signIn = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'btn-success')))
@@ -65,6 +66,8 @@ try:
         if userinput == "1":
             kelas1 = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="kt_content"]/div[2]/div[1]/div/div/div[2]/div[2]/div[2]/a')))
             kelas1.click()
+            absensi3 = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="kt_content"]/div[2]/div[1]/div/center/button')))
+            absensi3.click()
             #absensi1 = wait.until(EC.element_to_be_clickable((By.XPATH, '')))
             #absensi1 = click()
             print("SI3132 - Pengantar Bisnis dan Manajemen Kelas : Clicked.")
@@ -73,6 +76,8 @@ try:
             kelas2 = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="kt_content"]/div[2]/div[2]/div/div/div[2]/div[2]/div[2]/a')))
             kelas2.click()
             print("KOM3122 - Pemrograman Dasar (C++) Kelas: Clicked")
+            absensi3 = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="kt_content"]/div[2]/div[1]/div/center/button')))
+            absensi3.click()
             #absensi1 = wait.until(EC.element_to_be_clickable((By.XPATH, '')))
             #absensi1 = click()
             break
@@ -81,6 +86,7 @@ try:
             kelas3.click()
             absensi3 = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="kt_content"]/div[2]/div[1]/div/center/button')))
             absensi3.click()
+            
             print("Absensi Kelas KOM3121 : Clicked")
             #absensi1 = wait.until(EC.element_to_be_clickable((By.XPATH, '')))
             #absensi1 = click()
@@ -88,6 +94,8 @@ try:
         elif userinput == "4":
             kelas4 = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="kt_content"]/div[2]/div[4]/div/div/div[2]/div[2]/div[2]/a')))
             kelas4.click()
+            absensi3 = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="kt_content"]/div[2]/div[1]/div/center/button')))
+            absensi3.click()
             print("SI3131 - Konsep Sistem Informasi Kelas : Clicked")
             #absensi1 = wait.until(EC.element_to_be_clickable((By.XPATH, '')))
             #absensi1 = click()
@@ -95,6 +103,8 @@ try:
         elif userinput == "5":
             kelas5 = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="kt_content"]/div[2]/div[5]/div/div/div[2]/div[2]/div[2]/a')))
             kelas5.click()
+            absensi3 = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="kt_content"]/div[2]/div[1]/div/center/button')))
+            absensi3.click()
             print("MKK3111 - Bahasa Inggris 1 Kelas : Clicked")
             #absensi1 = wait.until(EC.element_to_be_clickable((By.XPATH, '')))
             #absensi1 = click()
@@ -102,6 +112,8 @@ try:
         elif userinput == "6":
             kelas6 = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="kt_content"]/div[2]/div[6]/div/div/div[2]/div[2]/div[2]/a')))
             kelas6.click()
+            absensi3 = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="kt_content"]/div[2]/div[1]/div/center/button')))
+            absensi3.click()
             print("MPK3101 - Pendidikan Pancasila Kelas : Clicked")
             #absensi1 = wait.until(EC.element_to_be_clickable((By.XPATH, '')))
             #absensi1 = click()
@@ -109,6 +121,8 @@ try:
         elif userinput == "7":
             kelas7 = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="kt_content"]/div[2]/div[7]/div/div/div[2]/div[2]/div[2]/a')))
             kelas7.click()
+            absensi3 = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="kt_content"]/div[2]/div[1]/div/center/button')))
+            absensi3.click()
             print("MPK3102 - Pendidikan Agama Kelas : Clicked")
             #absensi1 = wait.until(EC.element_to_be_clickable((By.XPATH, '')))
             #absensi1 = click()
@@ -116,6 +130,8 @@ try:
         elif userinput == "8":
             kelas8 = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="kt_content"]/div[2]/div[8]/div/div/div[2]/div[2]/div[2]/a')))
             kelas8.click()
+            absensi3 = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="kt_content"]/div[2]/div[1]/div/center/button')))
+            absensi3.click()
             print("MPK3103 - Pendidikan Kewarganegaraan Kelas : Clicked")
             #absensi1 = wait.until(EC.element_to_be_clickable((sBy.XPATH, '')))
             #absensi1 = click()
