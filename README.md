@@ -1,25 +1,24 @@
-# Absensi LMS Automation
+# LMS Attendance Automation
 
-This project automates the login and attendance process for the LMS (Learning Management System) of Thamrin University using Selenium WebDriver.
+An automated attendance system for LMS (Learning Management System) using Selenium WebDriver.
 
 ## Features
 
-- Automates login to the LMS.
-- Navigates to the virtual class.
-- Selects the desired class.
-- Marks attendance for the selected class.
+- Automated login to LMS platform
+- Class list retrieval and display
+- Automated attendance marking
+- Intelligent navigation through class pages
+- Error handling and retry mechanisms
 
 ## Prerequisites
 
 - Python 3.x
-- Google Chrome browser
-- ChromeDriver (compatible with your Chrome browser version)
-- Selenium library
-- asdasd
+- Chrome/Edge WebDriver
+- Selenium
+- pwinput
 
 ## Installation
 
-1. **Clone the repository:**
-   ```sh
-   git clone https://github.com/idruz3/AbsensiLMS.git
-   cd AbsensiLMS
+```bash
+pip install selenium
+pip install pwinput
