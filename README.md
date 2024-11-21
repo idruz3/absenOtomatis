@@ -15,6 +15,7 @@ This project automates the login and attendance process for the LMS (Learning Ma
 - Google Chrome browser
 - ChromeDriver (compatible with your Chrome browser version)
 - Selenium library
+- asdasd
 
 ## Installation
 
