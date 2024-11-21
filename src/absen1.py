@@ -194,8 +194,8 @@ def main():
             except Exception as e:
                 print(f"An error occurred: {e}")
                 print("Please try again.")
-
-        #driver.quit()
+        a = input("Press enter to exit")
+        driver.quit()
     except Exception as e:
         print(f"Critical error: {e}")
 
