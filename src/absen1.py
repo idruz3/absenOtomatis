@@ -1,4 +1,5 @@
 import getpass
+import sys
 import time
 import pwinput
 from selenium import webdriver
@@ -37,9 +38,9 @@ def login(driver, url, username, password):
         NoSuchElementException: If the specified elements are not found on the page.
     """
     driver.get(url)
+    driver.maximize_window()
     signin_form = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, "btn-success")))
     signin_form.click()
-    driver.maximize_window()
 
     try:
     
@@ -55,7 +56,7 @@ def login(driver, url, username, password):
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.LINK_TEXT, 'V-Class')))
         return True
     except TimeoutException:
-        print("Login failed: Incorrect username or password")
+        
         
         return False
     except NoSuchElementException as e:
@@ -110,8 +111,27 @@ def getClass(driver):
         return False, 0
 
 def selectClass(driver, number):
-    xpath2 = '//*[@id="kt_content"]/div[2]/div[1]/div/center/button'  # Target xpath to find
+    """
+    Attempts to select a class and click an attendance button on a webpage using Selenium WebDriver.
+    This function iterates through a list of classes on a webpage, clicks on each class, and checks if a specific 
+    attendance button (identified by its XPath) is present. If the button is found, it clicks the button.
+    Args:
+        driver (WebDriver): The Selenium WebDriver instance used to interact with the webpage.
+        number (int): The number of classes to iterate through.
+    Returns:
+        bool: True if the attendance button is found and clicked at least once, False otherwise.
+    Raises:
+        Exception: If an unexpected error occurs during execution.
+    Notes:
+        - The function uses explicit waits to handle dynamic content loading.
+        - If the target attendance button is not found after clicking a class, the function navigates back to the previous page 
+          and continues with the next class.
+        - The function handles TimeoutException and NoSuchElementException for individual elements.
+    """
     
+    xpath2 = '//*[@id="kt_content"]/div[2]/div[1]/div/center/button'  # Target xpath to find
+    button_clicked = False  # Flag to track if the button was clicked at least once
+
     try:
         for i in range(1, number + 1):
             # First xpath to click
@@ -122,46 +142,41 @@ def selectClass(driver, number):
                     EC.element_to_be_clickable((By.XPATH, xpath1))
                 )
                 element1.click()
-                #print(f"Clicked first element {i}, checking for target xpath...")
+                print(f"Mencari tombol absen di kelas nomor {i}, checking absen button...")
 
                 # Check if second xpath exists
                 try:
                     element2 = WebDriverWait(driver, 5).until(
                         EC.element_to_be_clickable((By.XPATH, xpath2))
                     )
-                    #print(f"Target xpath found after clicking element {i}")
+                    print(f"Tombol absen ada di kelas {i}")
+                    time.sleep(1)
                     element2.click()
-                    print("Clicked absensi button")
-                    return True
+                    print("Clicked absensi button.")
+                    button_clicked = True
                 except TimeoutException:
-                    #print(f"Target xpath not found, going back...")
-                    driver.back()
-                    time.sleep(2)  # Wait for page to load
-                    continue
-
-            except (TimeoutException, NoSuchElementException) as e:
-                print(f"Error with element {i}: {e}")
-                continue
-
-        print("Button absensi not found")
+                    print(f"Absen button not found, going back...")
+                driver.back()
+            except TimeoutException:
+                print(f"Class element not found for class {i}")
+        return button_clicked
+    except NoSuchElementException as e:
+        print(f"An error occurred: {e}")
         return False
-
     except Exception as e:
-        print(f"Unexpected error: {e}")
+        print(f"An unexpected error occurred: {e}")
         return False
-    
-       
-            
-         
+
 def main():
     """
     Main function with infinite login attempts until successful or user exits.
     """
-    print("Starting attendance automation...")  # Debug print
     
+    #username = sys.argv[1]
+    #password = sys.argv[2]
     url = "https://lms.thamrin.ac.id/"
     try:
-        print("Setting up web driver...")  # Debug print
+        
         driver = setup_driver()
         
         if driver is None:
@@ -190,12 +205,13 @@ def main():
                     if success:
                         selectClass(driver, number)
                 else:
-                    print("Invalid credentials. Please try again.")
+                    print("NIM/Password Salah. Please try again.")
             except Exception as e:
                 print(f"An error occurred: {e}")
                 print("Please try again.")
-        a = input("Press enter to exit")
-        driver.quit()
+
+        input("Press enter to exit the program \n ")
+        print("Exiting program...")
     except Exception as e:
         print(f"Critical error: {e}")
 
