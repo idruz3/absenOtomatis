@@ -32,15 +32,3 @@ pip install pwinput
    python src/absen1.py
    ```
 3. Follow the prompts to enter your NIM and password.
-
-## Functions
-
-- `setup_driver()`: Configures and returns a WebDriver instance.
-- `login(driver, url, username, password)`: Logs into the specified URL with the provided credentials.
-- `access_dashboard(driver)`: Navigates to the dashboard and retrieves the username.
-- `vClass(driver)`: Accesses the virtual class page.
-- `getClass(driver)`: Retrieves and prints the list of classes.
-- `selectClass(driver, number)`: Iterates through the list of classes and attempts to click an attendance button.
-
-
-s
