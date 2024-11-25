@@ -42,8 +42,5 @@ pip install pwinput
 - `getClass(driver)`: Retrieves and prints the list of classes.
 - `selectClass(driver, number)`: Iterates through the list of classes and attempts to click an attendance button.
 
-## License
 
-This project is licensed under the MIT License.
-
-
+s
