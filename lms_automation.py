@@ -12,7 +12,7 @@ from selenium.common.exceptions import NoSuchElementException, TimeoutException,
 from config import Config
 from logging_utils import Logger
 from email_notifier import EmailNotifier
-from webdriver_manager import WebDriverManager
+from selenium_manager import WebDriverManager
 from attendance_logger import AttendanceLogger
 from system_tray import SystemTrayIcon
 
@@ -133,8 +133,199 @@ class LMSAttendanceAutomation:
                 pass
             return False, 0, set()
     
-    # The rest of the methods (process_attendance, run_session, etc.)
-    # [Remaining methods truncated for brevity - copy from original file]
+    def run_session(self) -> None:
+        """Run a single attendance check session"""
+        driver = None
+        try:
+            self.session_count += 1
+            self.logger.info(f"Starting attendance check session #{self.session_count}")
+            self.system_tray.update_status("running")
+            
+            # Initialize webdriver
+            driver = self.driver_manager.get_driver()
+            if not driver:
+                self.logger.error("Failed to initialize WebDriver")
+                return
+                
+            # Login to the LMS
+            if not self.login(driver):
+                self.logger.error("Login failed, aborting session")
+                return
+                
+            # Navigate to V-Class and get class info
+            success, class_count, current_classes = self.navigate_to_vclass(driver)
+            if not success or class_count == 0:
+                self.logger.warning("No classes found or navigation failed")
+                return
+                
+            # Check each class for attendance opportunities
+            attendance_found = False
+            for class_index in range(class_count):
+                # Navigate to class (classes are indexed from 0)
+                try:
+                    # Wait for class elements to be visible
+                    wait = WebDriverWait(driver, 10)
+                    class_elements = wait.until(
+                        EC.presence_of_all_elements_located((By.CLASS_NAME, 'kt-widget__username')))
+                    
+                    # Click on the class
+                    class_elements[class_index].click()
+                    self.logger.info(f"Checking class {class_index + 1}/{class_count}")
+                    
+                    # Check for attendance section
+                    time.sleep(random.uniform(1.5, 3.0))  # Random wait to appear more human-like
+                    
+                    # Try to find attendance elements
+                    try:
+                        attendance_elements = driver.find_elements(By.XPATH, "//button[contains(text(), 'Attend')]")
+                        if attendance_elements:
+                            self.logger.info(f"Found {len(attendance_elements)} attendance buttons")
+                            attendance_found = True
+                            
+                            # Process each attendance button
+                            for i, button in enumerate(attendance_elements):
+                                try:
+                                    class_name = list(current_classes)[class_index] if class_index < len(current_classes) else "Unknown"
+                                    self.logger.info(f"Submitting attendance {i+1}/{len(attendance_elements)} for class: {class_name}")
+                                    
+                                    # Click the attendance button
+                                    button.click()
+                                    time.sleep(random.uniform(1.0, 2.0))
+                                    
+                                    # Handle any confirm dialog if it appears
+                                    try:
+                                        confirm_button = WebDriverWait(driver, 3).until(
+                                            EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), 'Confirm') or contains(text(), 'OK')]")))
+                                        confirm_button.click()
+                                    except (TimeoutException, NoSuchElementException):
+                                        # No confirmation dialog found, continue
+                                        pass
+                                        
+                                    # Log successful attendance
+                                    self.attendance_logger.log_attendance(class_name)
+                                    
+                                    # Send success notification
+                                    self.email_notifier.send_notification(
+                                        f"Attendance Submitted - {class_name}",
+                                        f"Successfully submitted attendance for class: {class_name}",
+                                        "success"
+                                    )
+                                except Exception as e:
+                                    self.logger.error(f"Error processing attendance button {i+1}: {str(e)}")
+                        else:
+                            self.logger.info("No attendance buttons found for this class")
+                    except Exception as e:
+                        self.logger.error(f"Error finding attendance elements: {str(e)}")
+                    
+                    # Go back to class list
+                    driver.back()
+                    time.sleep(random.uniform(1.0, 2.0))
+                    
+                except Exception as e:
+                    self.logger.error(f"Error navigating to class {class_index + 1}: {str(e)}")
+                    # Try to go back to the class list
+                    try:
+                        driver.back()
+                        time.sleep(1.0)
+                    except:
+                        pass
+            
+            if not attendance_found:
+                self.logger.info("No attendance opportunities found in any class")
+                
+            self.logger.info(f"Completed attendance check session #{self.session_count}")
+            self.system_tray.update_status("idle")
+            
+        except UnexpectedAlertPresentException as e:
+            self.logger.warning(f"Unexpected alert: {str(e)}")
+            try:
+                alert = driver.switch_to.alert
+                alert.accept()
+            except:
+                pass
+        except Exception as e:
+            self.logger.error(f"Error during attendance session: {str(e)}")
+            self.system_tray.update_status("error")
+            self.email_notifier.send_notification(
+                "Automation Error",
+                f"Error during attendance check session #{self.session_count}.\nError: {str(e)}",
+                "error"
+            )
+        finally:
+            # Clean up
+            if driver:
+                self.driver_manager.quit_driver(driver)
+
+    def start_automation(self) -> None:
+        """Start the attendance automation process"""
+        if self.running:
+            self.logger.info("Automation is already running")
+            return
+            
+        self.logger.info("Starting attendance automation")
+        self.running = True
+        self.system_tray.update_status("running")
+        
+        # Create and start automation thread
+        self.automation_thread = threading.Thread(target=self.run_automation, daemon=True)
+        self.automation_thread.start()
+        
+        # Send notification
+        self.email_notifier.send_notification(
+            "Automation Started",
+            "LMS Attendance automation has been started and will check for attendance periodically.",
+            "info"
+        )
+    
+    def run_automation(self) -> None:
+        """Run the automation process in a loop"""
+        try:
+            settings = self.config.get_settings()
+            interval = int(settings.get("check_interval", 3600))  # Default: 1 hour
+            
+            while self.running:
+                self.run_session()
+                self.logger.info(f"Sleeping for {interval} seconds until next check")
+                
+                # Sleep in smaller increments to allow for clean shutdown
+                for _ in range(interval):
+                    if not self.running:
+                        break
+                    time.sleep(1)
+                    
+        except Exception as e:
+            self.logger.error(f"Error in automation thread: {str(e)}")
+            self.system_tray.update_status("error")
+            self.running = False
+    
+    def run_now(self) -> None:
+        """Run a single attendance check session immediately"""
+        if not self.running:
+            self.logger.info("Running single attendance check")
+            threading.Thread(target=self.run_session, daemon=True).start()
+        else:
+            self.logger.info("Automation is already running, skipping manual run")
+    
+    def stop_automation(self) -> None:
+        """Stop the attendance automation process"""
+        if not self.running:
+            self.logger.info("Automation is not running")
+            return
+            
+        self.logger.info("Stopping attendance automation")
+        self.running = False
+        
+        if self.automation_thread and self.automation_thread.is_alive():
+            self.automation_thread.join(timeout=5)
+            
+        self.system_tray.update_status("idle")
+        
+        # Send notification
+        self.email_notifier.send_notification(
+            "Automation Stopped",
+            "LMS Attendance automation has been stopped.",
+            "info"
+        )
 
     # Add the test_email_notification method
     def test_email_notification(self) -> None:
