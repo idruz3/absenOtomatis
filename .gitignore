@@ -1,0 +1,21 @@
+# Ignore everything 
+* 
+# Don't ignore Python files 
+!*.py 
+# Don't ignore .gitignore itself 
+!.gitignore 
+# Don't ignore directories 
+!*/ 
+# Still ignore pycache directories and their contents 
+__pycache__/ 
+*.py[cod] 
+*$py.class 
+# Ignore virtual environment folders 
+venv/ 
+env/ 
+.venv/ 
+.env/ 
+# Ignore executable build folders 
+build/ 
+dist/ 
+*.spec 
