@@ -1,9 +1,3 @@
-
-Now, let's add this `README.md` file to your repository.
-
-```bash
-echo "# LMS Attendance Automation
-
 LMS Attendance Automation is a Python-based application designed to automate the process of marking attendance in an LMS (Learning Management System). The application uses Selenium WebDriver to interact with the LMS website and can send notifications via email and WhatsApp.
 
 ## Features
@@ -125,8 +119,3 @@ Contributions are welcome! Please submit a pull request or open an issue to disc
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 " > README.md
-
-# Add and commit the README.md file to the repository
-git add README.md
-git commit -m "Add README.md"
-git push origin main
