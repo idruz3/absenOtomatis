@@ -91,6 +91,7 @@ class LMSAttendanceAutomation:
             
             self.logger.info("Navigated to V-Class section")
             
+            
             # Wait for page to load
             time.sleep(2)
             
@@ -136,6 +137,7 @@ class LMSAttendanceAutomation:
     def run_session(self) -> None:
         """Run a single attendance check session"""
         driver = None
+        attendance_button_xpath = '//*[@id="kt_content"]/div[2]/div[1]/div/center/button'
         try:
             self.session_count += 1
             self.logger.info(f"Starting attendance check session #{self.session_count}")
@@ -158,35 +160,48 @@ class LMSAttendanceAutomation:
                 self.logger.warning("No classes found or navigation failed")
                 return
                 
+            # Check if we need to log attendance today
+            already_logged = self.attendance_logger.is_already_logged_today()
+            if not already_logged:
+                self.attendance_logger.add_session_header()
+                
             # Check each class for attendance opportunities
             attendance_found = False
-            for class_index in range(class_count):
-                # Navigate to class (classes are indexed from 0)
+            class_list = list(current_classes)
+            
+            for i in range(1, class_count + 1):  # Classes are numbered from 1 to class_count in the UI
                 try:
-                    # Wait for class elements to be visible
+                    # Find the class element using the correct XPath
+                    class_xpath = f'//*[@id="kt_content"]/div[2]/div[{i}]/div/div/div[2]/div[2]'
+                    self.logger.info(f"Trying to find class with XPath: {class_xpath}")
+                    
+                    # Wait for the class element to be clickable
                     wait = WebDriverWait(driver, 10)
-                    class_elements = wait.until(
-                        EC.presence_of_all_elements_located((By.CLASS_NAME, 'kt-widget__username')))
+                    class_element = wait.until(EC.element_to_be_clickable((By.XPATH, class_xpath)))
                     
-                    # Click on the class
-                    class_elements[class_index].click()
-                    self.logger.info(f"Checking class {class_index + 1}/{class_count}")
+                    # Get class name before clicking
+                    class_name = "Unknown"
+                    if i-1 < len(class_list):
+                        class_name = class_list[i-1]
+                    self.logger.info(f"Checking class {i}/{class_count}: {class_name}")
                     
-                    # Check for attendance section
+                    # Click on the class element
+                    class_element.click()
+                    
+                    # Wait for page to load
                     time.sleep(random.uniform(1.5, 3.0))  # Random wait to appear more human-like
                     
                     # Try to find attendance elements
                     try:
-                        attendance_elements = driver.find_elements(By.XPATH, "//button[contains(text(), 'Attend')]")
+                        attendance_elements = driver.find_elements(By.XPATH, attendance_button_xpath)
                         if attendance_elements:
                             self.logger.info(f"Found {len(attendance_elements)} attendance buttons")
                             attendance_found = True
                             
                             # Process each attendance button
-                            for i, button in enumerate(attendance_elements):
+                            for j, button in enumerate(attendance_elements):
                                 try:
-                                    class_name = list(current_classes)[class_index] if class_index < len(current_classes) else "Unknown"
-                                    self.logger.info(f"Submitting attendance {i+1}/{len(attendance_elements)} for class: {class_name}")
+                                    self.logger.info(f"Submitting attendance {j+1}/{len(attendance_elements)} for class: {class_name}")
                                     
                                     # Click the attendance button
                                     button.click()
@@ -202,7 +217,7 @@ class LMSAttendanceAutomation:
                                         pass
                                         
                                     # Log successful attendance
-                                    self.attendance_logger.log_attendance(class_name)
+                                    self.attendance_logger.log_attendance(i, class_name)
                                     
                                     # Send success notification
                                     self.email_notifier.send_notification(
@@ -211,9 +226,11 @@ class LMSAttendanceAutomation:
                                         "success"
                                     )
                                 except Exception as e:
-                                    self.logger.error(f"Error processing attendance button {i+1}: {str(e)}")
+                                    self.logger.error(f"Error processing attendance button {j+1}: {str(e)}")
                         else:
-                            self.logger.info("No attendance buttons found for this class")
+                            self.logger.info(f"No attendance buttons found for class: {class_name}")
+                            if not already_logged:
+                                self.attendance_logger.log_already_attended(i)
                     except Exception as e:
                         self.logger.error(f"Error finding attendance elements: {str(e)}")
                     
@@ -221,14 +238,29 @@ class LMSAttendanceAutomation:
                     driver.back()
                     time.sleep(random.uniform(1.0, 2.0))
                     
+                    # Sometimes we need to go back to the V-Class section again
+                    try:
+                        # Check if we're still in the class view
+                        if driver.find_elements(By.XPATH, "//a[contains(text(), 'V-Class')]"):
+                            # We're not in the class list, so click on V-Class again
+                            wait.until(EC.element_to_be_clickable((By.LINK_TEXT, 'V-Class'))).click()
+                            time.sleep(random.uniform(1.0, 2.0))
+                    except Exception as e:
+                        self.logger.error(f"Error navigating back to V-Class list: {str(e)}")
+                    
                 except Exception as e:
-                    self.logger.error(f"Error navigating to class {class_index + 1}: {str(e)}")
-                    # Try to go back to the class list
+                    self.logger.error(f"Error navigating to class {i}: {str(e)}")
+                    # Try to recover by going back to the V-Class section
                     try:
                         driver.back()
                         time.sleep(1.0)
-                    except:
-                        pass
+                        # Try to find and click the V-Class link again
+                        v_class_elements = driver.find_elements(By.LINK_TEXT, 'V-Class')
+                        if v_class_elements:
+                            v_class_elements[0].click()
+                            time.sleep(2.0)
+                    except Exception as recovery_error:
+                        self.logger.error(f"Error during recovery: {str(recovery_error)}")
             
             if not attendance_found:
                 self.logger.info("No attendance opportunities found in any class")

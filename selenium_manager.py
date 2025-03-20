@@ -25,7 +25,7 @@ class WebDriverManager:
         """Create optimized Chrome options - only called once"""
         chrome_options = Options()
         chrome_options.add_argument('log-level=3')  # Suppress browser logs
-        chrome_options.add_argument("--headless=new")  # Run in headless mode
+        #chrome_options.add_argument("--headless=new")  # Run in headless mode
         
         # Add additional arguments to improve stability and performance
         chrome_options.add_argument("--no-sandbox")
@@ -34,7 +34,7 @@ class WebDriverManager:
         chrome_options.add_argument("--disable-extensions")
         chrome_options.add_argument("--disable-software-rasterizer")
         chrome_options.add_argument("--disable-features=IsolateOrigins,site-per-process")
-        chrome_options.add_argument("--blink-settings=imagesEnabled=false")  # Disable images
+        #chrome_options.add_argument("--blink-settings=imagesEnabled=false")  # Disable images
         chrome_options.add_argument("--window-size=1920,1080")
         chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])
         
