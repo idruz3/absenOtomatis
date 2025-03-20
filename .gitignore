@@ -1,21 +1,118 @@
-# Ignore everything 
-* 
-# Don't ignore Python files 
-!*.py 
-# Don't ignore .gitignore itself 
-!.gitignore 
-# Don't ignore directories 
-!*/ 
-# Still ignore pycache directories and their contents 
-__pycache__/ 
-*.py[cod] 
-*$py.class 
-# Ignore virtual environment folders 
-venv/ 
-env/ 
-.venv/ 
-.env/ 
-# Ignore executable build folders 
-build/ 
-dist/ 
-*.spec 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.env
+.venv
+env.bak/
+venv.bak/
+
+# IDE - VSCode
+.vscode/
+*.code-workspace
+.history
+
+# IDE - PyCharm
+.idea/
+*.iml
+*.iws
+.idea_modules/
+
+# Logs and databases
+*.log
+logs/
+*.db
+*.sqlite3
+
+# Project specific
+whatsapp_automation/
+persistent_session/
+attendance_log.txt
+lms_automation_config.ini
+session.json
+
+# Build and packaging
+dist/
+build/
+Output/
+*.spec
+*.manifest
+*.exe
+*.msi
+
+# Chrome WebDriver
+.wdm/
+chromedriver*
+
+# System Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+
+# User-specific files
+*_local.*
+local_settings.py
+
+# Test coverage
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Credentials and sensitive data
+credentials.json
+secrets.json
+*.key
+*.pem
+
+# Compiler output
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.dll
+*.dylib
+
+# Windows Installer files
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+
+# Automatically created by Windows
+$RECYCLE.BIN/
+System Volume Information/
